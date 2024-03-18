@@ -5,10 +5,11 @@ const Sequelize = require('sequelize');
 
 exports.createCommande = async (req, res) => {
   try {
-    const { userId,produitIds, totalPrice } = req.body;
+    const { userId,produitIds, totalPrice,state } = req.body;
     const newCommande = await Commande.create({
       userId,
       totalPrice,
+      state,
       commandeDate: Sequelize.NOW,
     });
     await Promise.all(

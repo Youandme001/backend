@@ -1,29 +1,35 @@
 const User = require('../models/user.model');
-
+const bcrypt = require('bcryptjs'); 
+const jwt = require('jsonwebtoken');
 exports.createUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, password, address, gouvernorat, city, postalCode } = req.body;
+    const { firstName, lastName, email, password, address, gouvernorat, city,phone, postalCode } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10); 
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already exists' });
+    }
     const newUser = await User.create({
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       email,
-      password,
+      phone,
+      password: hashedPassword, 
       address,
       gouvernorat,
       city,
       postalCode
     });
-
     res.status(201).json({ message: 'User created successfully', data: newUser });
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ message: 'Error creating user' });
   }
 };
-
 exports.updateUser = async (req, res) => {
-    try {
-      const userId = req.body.id;
+    // try {
+      const userId = req.params.id;
+      console.log(userId);
       const updatedUserData = req.body;
       delete updatedUserData.id;
       const rowsAffected = await User.update(updatedUserData, {
@@ -35,10 +41,10 @@ exports.updateUser = async (req, res) => {
       }
       const updatedUser = await User.findByPk(userId);
       res.status(200).json({ message: 'User updated successfully', data: updatedUser });
-    } catch (error) {
-      console.error('Error updating user:', error);
-      res.status(500).json({ message: 'Error updating user' });
-    }
+    // } catch (error) {
+    //   console.error('Error updating user:', error);
+    //   res.status(500).json({ message: 'Error updating user' });
+    // }
   };
   
 exports.deleteUser = async (req, res) => {
@@ -81,5 +87,24 @@ exports.getAllUsers = async (req, res) => {
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ message: 'Error fetching users' });
+  }
+};
+
+exports.loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    const token = jwt.sign({ userId: user.id }, 'youandme', { expiresIn: '1h' }); 
+    res.status(200).json({ message: 'Login successful', user: user, token });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ message: 'Error logging in' });
   }
 };

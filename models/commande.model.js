@@ -29,7 +29,11 @@ const Commande = sequelize.define('Commande', {
     defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
   },
   totalPrice: {
-    type: DataTypes.DECIMAL, // Adjust precision/scale as needed
+    type: DataTypes.DECIMAL, 
+    allowNull: false,
+  },
+  state: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
   createdAt: {
@@ -44,8 +48,6 @@ const Commande = sequelize.define('Commande', {
   },
 });
 
-// Define relationships
-Commande.belongsTo(User, { foreignKey: 'userId' }); // User-Commande association
-Commande.belongsToMany(Produit, { through: 'CommandeProduit' }); // Commande-Produit association
-
+Commande.belongsTo(User, { foreignKey: 'userId' }); 
+sequelize.sync();
 module.exports = Commande;

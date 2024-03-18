@@ -12,10 +12,14 @@ const Produit = require('./models/produit.model.js');
 const  ProduitImage = require('./models/produitImage.model.js');
 const multer = require('multer');
 const path = require('path');
+
+// Enable CORS globally
+app.use(cors());
+
 router.use(cors());
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-
+// MySQL connection
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
