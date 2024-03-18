@@ -12,45 +12,39 @@ const sequelize = new Sequelize(
   dialect: 'mysql',
 });
 
-const CommandeProduit = sequelize.define('CommandeProduit', {
+const Sequelize = require('sequelize');
+
+  const Produit = sequelize.define('Produit', {
     id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
-    commandeId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: { // Foreign key constraint
-        model: 'Commande',
-        key: 'id',
-      },
+    description: {
+      type: DataTypes.TEXT,
     },
-    produitId: {
-      type: DataTypes.INTEGER,
+    price: {
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      references: { // Foreign key constraint
-        model: 'Produit',
-        key: 'id',
-      },
+    },
+    volume: {
+      type: DataTypes.INTEGER,
     },
     createdAt: {
       type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      defaultValue: Sequelize.NOW,
     },
   });
-  Commande.belongsTo(User, { foreignKey: 'userId' });
-
-  Commande.belongsToMany(Produit, { through: 'CommandeProduit', foreignKey: 'commandeId' });
-
-  Produit.belongsToMany(Commande, { through: 'CommandeProduit', foreignKey: 'produitId' });
+  CommandeProduit.belongsTo(Commande, { foreignKey: 'CommandeId' });
+  CommandeProduit.belongsTo(Produit, { foreignKey: 'ProduitId' });
   sequelize.sync(); 
 
 module.exports = CommandeProduit;

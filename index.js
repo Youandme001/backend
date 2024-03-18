@@ -32,6 +32,7 @@ db.connect((err) => {
 });
 
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 app.use(logger());
 app.use("/produit", require("./routes/produit.routes"));
 app.use("/user", require("./routes/user.routes"));

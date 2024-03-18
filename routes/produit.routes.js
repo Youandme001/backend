@@ -8,14 +8,14 @@ const fs = require('fs'); // Import the 'fs' module for file system operations
 router.use(cors());
 
 // Function to ensure that the destination directory exists
-const createUploadsDirectory = () => {
-  const directory = path.join(__dirname, '../uploads/produit'); 
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, { recursive: true }); 
-  }
-};
+// const createUploadsDirectory = () => {
+//   const directory = path.join(__dirname, '../uploads/produit'); 
+//   if (!fs.existsSync(directory)) {
+//     fs.mkdirSync(directory, { recursive: true }); 
+//   }
+// };
 
-createUploadsDirectory(); 
+// createUploadsDirectory(); 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, '../uploads/produit')); 

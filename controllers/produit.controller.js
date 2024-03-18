@@ -1,7 +1,7 @@
 const ProduitService = require('../services/produit.services.js');
 const Produit = require('../models/produit.model.js');
 const  ProduitImage = require('../models/produitImage.model.js');
-
+const ip= "http://localhost:4000/uploads/produit/"
 
 exports.createProduit = async (req, res, next) => {
   try {
@@ -13,7 +13,7 @@ exports.createProduit = async (req, res, next) => {
         return await ProduitImage.create({
           product_id: produitId,
           filename: image.filename,
-          filepath: image.path,
+          filepath: ip+image.filename,
         });
       });
       await Promise.all(imagePromises);

@@ -46,8 +46,7 @@ const Commande = sequelize.define('Commande', {
 
 // Define relationships (assuming you have User and Produit models)
 Commande.belongsTo(User, { foreignKey: 'userId' }); // User-Commande association
-Commande.belongsToMany(Produit, { through: 'CommandeProduit' }); // Many-to-Many association with Produit
-
+Commande.belongsToMany(Produit, { through: 'CommandeProduit' });
 sequelize.sync(); 
 
 module.exports = Commande;
