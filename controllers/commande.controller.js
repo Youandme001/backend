@@ -1,43 +1,30 @@
 const Commande = require('../models/commande.model');
 const Produit = require('../models/produit.model.js');
+const CommandProduit = require('../models/CommandeProduit.model.js');
+const Sequelize = require('sequelize');
 
 exports.createCommande = async (req, res) => {
   try {
-    const { userId, produitIds, totalPrice } = req.body;
-
-    // Ensure all produits exist:
-    const existingProduits = await Produit.findAll({
-      where: {
-        id: {
-          [Sequelize.Op.in]: produitIds, 
-        },
-      },
-    });
-    if (existingProduits.length !== produitIds.length) {
-      throw new Error('One or more produitIds do not exist');
-    }
-
+    const { userId,produitIds, totalPrice } = req.body;
     const newCommande = await Commande.create({
       userId,
       totalPrice,
-      commandeDate: new Date(), 
+      commandeDate: Sequelize.NOW,
     });
-
-    // Add produits using built-in association methods:
-    await Promise.all(produitIds.map(async (produitId) => {
-      const produit = existingProduits.find((p) => p.id === produitId);
-      await newCommande.addProduit(produit); 
-    }));
-
+    await Promise.all(
+      produitIds.map(async (produitId) => {
+        return await CommandProduit.create({
+          produitId: produitId,
+          commandeId: newCommande.id,
+        });
+      })
+    );
     res.status(201).json({ message: 'Commande created successfully', data: newCommande });
   } catch (error) {
     console.error('Error creating Commande:', error);
     res.status(500).json({ message: 'Error creating Commande' });
   }
 };
-
-
-
 
 exports.getAllCommande = async (req, res, next) => {
   try {

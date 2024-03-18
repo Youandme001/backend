@@ -26,7 +26,7 @@ const Commande = sequelize.define('Commande', {
   commandeDate: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
   },
   totalPrice: {
     type: DataTypes.DECIMAL, // Adjust precision/scale as needed
@@ -35,18 +35,17 @@ const Commande = sequelize.define('Commande', {
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
   },
   updatedAt: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
   },
 });
 
-// Define relationships (assuming you have User and Produit models)
+// Define relationships
 Commande.belongsTo(User, { foreignKey: 'userId' }); // User-Commande association
-Commande.belongsToMany(Produit, { through: 'CommandeProduit' });
-sequelize.sync(); 
+Commande.belongsToMany(Produit, { through: 'CommandeProduit' }); // Commande-Produit association
 
 module.exports = Commande;
