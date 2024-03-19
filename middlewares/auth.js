@@ -42,3 +42,28 @@ module.exports = function (req, res, next) {
     res.status(401).json({ message: 'Invalid token' });
   }
 };
+
+const authenticateUser = (req, res, next) => {
+  const accessToken = req.headers.authorization;
+  if (!accessToken) {
+    return res.status(401).json({ message: 'Unauthorized: Access token is required' });
+  }
+  try {
+    // Decode and verify the token
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+    if (decoded.admin) {
+      req.isAdmin = true;
+    } else {
+      req.isUser = true;
+    }
+    if (decoded.exp <= Date.now() / 1000) {
+      return res.status(401).json({ message: 'Unauthorized: Token has expired' });
+    }
+    next();
+  } catch (error) {
+    console.error('Error authenticating user:', error);
+    return res.status(403).json({ message: 'Forbidden: Invalid token' });
+  }
+};
+
+module.exports = authenticateUser;
