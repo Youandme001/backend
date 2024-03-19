@@ -41,6 +41,8 @@ app.use(logger());
 app.use("/produit", require("./routes/produit.routes"));
 app.use("/user", require("./routes/user.routes"));
 app.use("/commande", require("./routes/commande.routes"));
+app.use("/admin", require("./routes/admin.routes"));
+
 
 // app.post('/createProduit',upload.array('images'), async (req, res, next) => {
 //   try {

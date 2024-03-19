@@ -4,18 +4,9 @@ const ProduitController = require("../controllers/produit.controller.js");
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs'); // Import the 'fs' module for file system operations
+const fs = require('fs'); 
 router.use(cors());
 
-// Function to ensure that the destination directory exists
-// const createUploadsDirectory = () => {
-//   const directory = path.join(__dirname, '../uploads/produit'); 
-//   if (!fs.existsSync(directory)) {
-//     fs.mkdirSync(directory, { recursive: true }); 
-//   }
-// };
-
-// createUploadsDirectory(); 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, '../uploads/produit')); 
@@ -27,10 +18,22 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Authentication middleware function
+const authenticateUser = (req, res, next) => {
+
+  const accessToken = req.headers.authorization;
+
+  if (!accessToken) {
+    return res.status(401).json({ message: 'Unauthorized: Access token is required' });
+  }
+  next();
+};
+// Apply authentication middleware to protected routes
+router.use(authenticateUser);
 router.get("/", ProduitController.getAllProduits);
 router.get("/:id", ProduitController.getProduitById);
-router.post('/create', upload.array('images'), ProduitController.createProduit);
-router.put("/update",upload.array('images'), ProduitController.updateProduit);
-router.delete("/delete/:id", ProduitController.deleteProduit);
+router.post('/create',authenticateUser, upload.array('images'), ProduitController.createProduit);
+router.put("/update",authenticateUser,upload.array('images'), ProduitController.updateProduit);
+router.delete("/delete/:id",authenticateUser, ProduitController.deleteProduit);
 
 module.exports = router;
