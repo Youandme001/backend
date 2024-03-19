@@ -12,12 +12,11 @@ const authenticateUser = (req, res, next) => {
     next();
   };
   // Apply authentication middleware to protected routes
-router.use(authenticateUser);
 
 router.get("/",authenticateUser, CommandeController.getAllCommande);
 router.get("/:id",authenticateUser, CommandeController.getCommandeById);
 router.post('/create',authenticateUser, CommandeController.createCommande);
-router.put("/update",authenticateUser,CommandeController.updateCommande);
+router.put("/update/:id",authenticateUser,CommandeController.updateCommande);
 router.delete("/delete/:id",authenticateUser, CommandeController.deleteCommande);
 
 module.exports = router;

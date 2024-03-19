@@ -1,6 +1,7 @@
 const Commande = require('../models/commande.model');
 const Produit = require('../models/produit.model.js');
-const CommandProduit = require('../models/CommandeProduit.model.js');
+const User = require('../models/user.model.js');
+const CommandeProduit = require('../models/CommandeProduit.model.js');
 const Sequelize = require('sequelize');
 
 exports.createCommande = async (req, res) => {
@@ -30,14 +31,44 @@ exports.createCommande = async (req, res) => {
 exports.getAllCommande = async (req, res, next) => {
   try {
     const commandes = await Commande.findAll();
-    if (!commandes) {
-      return res.status(200).json({ message: 'No commandes found', data: [] });
-    }
-    res.status(200).json({ message: 'Success', data: commandes });
+    const commandesWithProducts = await Promise.all(commandes.map(async (commande) => {
+      const user = await User.findOne({
+        where: { id: commande.userId },
+        attributes: { exclude: ['password'] }
+      });
+
+      const commandeProduits = await CommandeProduit.findAll({
+        where: { commandeId: commande.id }
+      });
+
+      const products = await Promise.all(commandeProduits.map(async (cp) => {
+        const produit = await Produit.findOne({
+          where: { id: cp.produitId }
+        });
+        return {
+          id: produit.id,
+          name: produit.name,
+          price: cp.price
+        };
+      }));
+
+      return {
+        id: commande.id,
+        commandeDate: commande.commandeDate,
+        totalPrice: commande.totalPrice,
+        state: commande.state,
+        createdAt: commande.createdAt,
+        updatedAt: commande.updatedAt,
+        user: user,
+        products: products
+      };
+    }));
+    res.status(200).json({ message: "Success", data: commandesWithProducts });
   } catch (err) {
     next(err);
   }
 };
+
 
 // Function to get a Commande by its ID
 exports.getCommandeById = async (req, res) => {
@@ -58,17 +89,43 @@ exports.getCommandeById = async (req, res) => {
 exports.updateCommande = async (req, res) => {
   try {
     const commandeId = req.params.id;
-    const updatedData = req.body;
-    const [rowsAffected] = await Commande.update(updatedData, { where: { id: commandeId } });
-    if (rowsAffected === 0) {
+    const { state } = req.body; // Extract the state from the request body
+
+    const commande = await Commande.findByPk(commandeId, {
+      include: [{
+        model: Produit,
+        through: {
+          attributes: ['produitId'],
+        },
+      }],
+    });
+
+    if (!commande) {
       return res.status(404).json({ message: 'Commande not found' });
     }
-    res.status(200).json({ message: 'Commande updated successfully' });
+
+    // Update the state of the commande
+    commande.state = state;
+    await commande.save();
+
+    // If the state is "Confirmed", decrease the volume of each produit by 1
+    if (state === 'Confirmed') {
+      for (const produit of commande.Produits) {
+        if (produit.volume > 0) {
+          produit.volume -= 1;
+          await produit.save();
+        }
+      }
+    }
+
+    res.status(200).json({ message: 'Commande state updated successfully' });
   } catch (error) {
-    console.error('Error updating Commande:', error);
-    res.status(500).json({ message: 'Error updating Commande' });
+    console.error('Error updating Commande state:', error);
+    res.status(500).json({ message: 'Error updating Commande state' });
   }
 };
+
+
 
 // Function to delete a Commande
 exports.deleteCommande = async (req, res) => {

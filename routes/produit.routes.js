@@ -29,7 +29,6 @@ const authenticateUser = (req, res, next) => {
   next();
 };
 // Apply authentication middleware to protected routes
-router.use(authenticateUser);
 router.get("/", ProduitController.getAllProduits);
 router.get("/:id", ProduitController.getProduitById);
 router.post('/create',authenticateUser, upload.array('images'), ProduitController.createProduit);
