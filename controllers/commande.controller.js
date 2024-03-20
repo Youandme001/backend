@@ -11,11 +11,10 @@ exports.createCommande = async (req, res) => {
       userId,
       totalPrice,
       state,
-      commandeDate: Sequelize.NOW,
     });
     await Promise.all(
       produitIds.map(async (produitId) => {
-        return await CommandProduit.create({
+        return await CommandeProduit.create({
           produitId: produitId,
           commandeId: newCommande.id,
         });
