@@ -68,6 +68,56 @@ exports.getAllCommande = async (req, res, next) => {
   }
 };
 
+exports.getAllCommandsForUser = async (req, res, next) => {
+  try {
+    const userId = req.params.id; // Assuming you're passing the user ID through params
+
+    // Find all commands for the specified user
+    const commands = await Commande.findAll({
+      where: { userId },
+    });
+
+    // Process commands and include user and product details
+    const commandsWithProducts = await Promise.all(commands.map(async (command) => {
+      const user = await User.findOne({
+        where: { id: command.userId },
+        attributes: { exclude: ['password'] }
+      });
+
+      const commandProducts = await CommandeProduit.findAll({
+        where: { commandeId: command.id }
+      });
+
+      const products = await Promise.all(commandProducts.map(async (cp) => {
+        const product = await Produit.findOne({
+          where: { id: cp.produitId }
+        });
+        return {
+          id: product.id,
+          name: product.name,
+          price: cp.price
+        };
+      }));
+
+      return {
+        id: command.id,
+        commandeDate: command.commandeDate,
+        totalPrice: command.totalPrice,
+        state: command.state,
+        createdAt: command.createdAt,
+        updatedAt: command.updatedAt,
+        user: user,
+        products: products
+      };
+    }));
+
+    // Return the commands with products for the specified user
+    res.status(200).json({ message: "Success", data: commandsWithProducts });
+  } catch (err) {
+    // Handle errors
+    next(err);
+  }
+};
 
 // Function to get a Commande by its ID
 exports.getCommandeById = async (req, res) => {

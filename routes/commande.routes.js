@@ -48,6 +48,7 @@ const authenticateUser = (req, res, next) => {
 
 router.get("/",authenticateAdmin, CommandeController.getAllCommande);
 router.get("/:id",authenticateAdmin, CommandeController.getCommandeById);
+router.get("/userById/:id",authenticateUser, CommandeController.getAllCommandsForUser);
 router.post('/create',authenticateUser, CommandeController.createCommande);
 router.put("/update/:id",authenticateAdmin,CommandeController.updateCommande);
 router.delete("/delete/:id",authenticateAdmin, CommandeController.deleteCommande);

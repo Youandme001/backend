@@ -27,7 +27,7 @@ exports.createUser = async (req, res) => {
   }
 };
 exports.updateUser = async (req, res) => {
-    // try {
+    try {
       const userId = req.params.id;
       console.log(userId);
       const updatedUserData = req.body;
@@ -41,12 +41,34 @@ exports.updateUser = async (req, res) => {
       }
       const updatedUser = await User.findByPk(userId);
       res.status(200).json({ message: 'User updated successfully', data: updatedUser });
-    // } catch (error) {
-    //   console.error('Error updating user:', error);
-    //   res.status(500).json({ message: 'Error updating user' });
-    // }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      res.status(500).json({ message: 'Error updating user' });
+    }
   };
-  
+
+  // Function to update user password
+  exports.updatePassword = async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const { currentPassword, newPassword } = req.body;
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+      if (!isPasswordCorrect) {
+        return res.status(400).json({ message: 'Current password is incorrect' });
+      }
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await user.update({ password: hashedPassword });
+      res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error) {
+      console.error('Error updating password:', error);
+      res.status(500).json({ message: 'Error updating password' });
+    }
+  };
+
 exports.deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
