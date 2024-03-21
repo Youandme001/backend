@@ -51,12 +51,12 @@ exports.updateUser = async (req, res) => {
   exports.updatePassword = async (req, res) => {
     try {
       const userId = req.params.id;
-      const { currentPassword, newPassword } = req.body;
+      const { oldPassword, newPassword } = req.body;
       const user = await User.findByPk(userId);
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
-      const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+      const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
       if (!isPasswordCorrect) {
         return res.status(400).json({ message: 'Current password is incorrect' });
       }
