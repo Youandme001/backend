@@ -19,7 +19,7 @@ router.post(
 router.post('/login', adminController.login);
 
 // Protected route (example)
-router.get('/protected', auth, (req, res) => {
+router.get('/protected', auth.auth, (req, res) => {
   res.json({ message: 'You have access to this protected route' });
 });
 

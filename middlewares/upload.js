@@ -1,17 +1,15 @@
 // middleware.js
+const express = require("express");
 const multer = require('multer');
 const path = require('path');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname,'uploads/produit') )// Specify the destination directory for uploaded files
+    cb(null, path.join(__dirname, '../uploads/produit')); 
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname) // Use the original file name for storing
+    cb(null, file.originalname); 
   }
-})
-
+});
 const upload = multer({ storage });
 
-module.exports = {
-  upload
-};
+module.exports = upload;
