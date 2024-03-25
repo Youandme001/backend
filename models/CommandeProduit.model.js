@@ -33,6 +33,10 @@ const CommandeProduit = sequelize.define('CommandeProduit', {
       key: 'id',
     },
   },
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 });
 
 // Define relationships

@@ -1,24 +1,27 @@
 const User = require('../models/user.model');
 const bcrypt = require('bcryptjs'); 
 const jwt = require('jsonwebtoken');
+
 exports.createUser = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, address, gouvernorat, city,phone, postalCode } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10); 
-    const existingUser = await User.findOne({ where: { email: email } });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email already exists' });
+    const { firstName, lastName, email, password, address, gouvernorat, city, phone, postalCode } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const existingUserByEmail = await User.findOne({ where: { email: email } });
+    if (existingUserByEmail) {
+      return res.status(201).json({ message: 'Email already exists' });
     }
-    const existingUser2 = await User.findOne({ where: {  phone: phone  } });
-    if (existingUser) {
-      return res.status(400).json({ message: 'phone already exists' });
+
+    const existingUserByPhone = await User.findOne({ where: { phone: phone } });
+    if (existingUserByPhone) {
+      return res.status(201).json({ message: 'Phone already exists' });
     }
     const newUser = await User.create({
       firstName,
       lastName,
       email,
       phone,
-      password: hashedPassword, 
+      password: hashedPassword,
       address,
       gouvernorat,
       city,
@@ -30,6 +33,7 @@ exports.createUser = async (req, res) => {
     res.status(500).json({ message: 'Error creating user' });
   }
 };
+
 exports.updateUser = async (req, res) => {
     try {
       const userId = req.params.id;

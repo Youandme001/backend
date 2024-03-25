@@ -6,20 +6,26 @@ const Sequelize = require('sequelize');
 
 exports.createCommande = async (req, res) => {
   try {
-    const { userId,produitIds, totalPrice,state } = req.body;
+    const { userId, products, totalPrice } = req.body;
+
+    // Create new Commande
     const newCommande = await Commande.create({
       userId,
       totalPrice,
-      state,
+      state: 'pending', // Assuming 'state' is set to 'pending' by default
     });
+
+    // Create CommandeProduit for each product
     await Promise.all(
-      produitIds.map(async (produitId) => {
+      products.map(async (product) => {
         return await CommandeProduit.create({
-          produitId: produitId,
+          produitId: product.productId,
+          quantity: product.quantity,
           commandeId: newCommande.id,
         });
       })
     );
+
     res.status(201).json({ message: 'Commande created successfully', data: newCommande });
   } catch (error) {
     console.error('Error creating Commande:', error);
@@ -41,13 +47,12 @@ exports.getAllCommande = async (req, res, next) => {
       });
 
       const products = await Promise.all(commandeProduits.map(async (cp) => {
-        const produit = await Produit.findOne({
-          where: { id: cp.produitId }
-        });
+        const produit = await Produit.findByPk(cp.produitId);
         return {
           id: produit.id,
           name: produit.name,
-          price: cp.price
+          price: produit.price, // Use 'price' from the produit model
+          quantity: cp.quantity // Add quantity field
         };
       }));
 
@@ -65,6 +70,52 @@ exports.getAllCommande = async (req, res, next) => {
     res.status(200).json({ message: "Success", data: commandesWithProducts });
   } catch (err) {
     next(err);
+  }
+};
+
+// Function to get a Commande by its ID
+exports.getCommandeById = async (req, res) => {
+  try {
+    const commandeId = req.params.id;
+    const commande = await Commande.findByPk(commandeId, {
+      include: [{
+        model: User,
+        attributes: { exclude: ['password'] }
+      }, {
+        model: CommandeProduit,
+        include: [{
+          model: Produit
+        }]
+      }]
+    });
+
+    if (!commande) {
+      return res.status(404).json({ message: 'Commande not found' });
+    }
+
+    const user = commande.User;
+    const products = commande.CommandeProduits.map(cp => ({
+      id: cp.Produit.id,
+      name: cp.Produit.name,
+      price: cp.Produit.price,
+      quantity: cp.quantity
+    }));
+
+    const commandeData = {
+      id: commande.id,
+      commandeDate: commande.commandeDate,
+      totalPrice: commande.totalPrice,
+      state: commande.state,
+      createdAt: commande.createdAt,
+      updatedAt: commande.updatedAt,
+      user: user,
+      products: products
+    };
+
+    res.status(200).json({ message: 'Success', data: commandeData });
+  } catch (error) {
+    console.error('Error getting Commande:', error);
+    res.status(500).json({ message: 'Error getting Commande' });
   }
 };
 
@@ -89,13 +140,12 @@ exports.getAllCommandsForUser = async (req, res, next) => {
       });
 
       const products = await Promise.all(commandProducts.map(async (cp) => {
-        const product = await Produit.findOne({
-          where: { id: cp.produitId }
-        });
+        const product = await Produit.findByPk(cp.produitId);
         return {
           id: product.id,
           name: product.name,
-          price: cp.price
+          price: product.price, // Use 'price' from the produit model
+          quantity: cp.quantity // Add quantity field
         };
       }));
 
@@ -116,21 +166,6 @@ exports.getAllCommandsForUser = async (req, res, next) => {
   } catch (err) {
     // Handle errors
     next(err);
-  }
-};
-
-// Function to get a Commande by its ID
-exports.getCommandeById = async (req, res) => {
-  try {
-    const commandeId = req.params.id;
-    const commande = await Commande.findByPk(commandeId);
-    if (!commande) {
-      return res.status(404).json({ message: 'Commande not found' });
-    }
-    res.status(200).json({ message: 'Success', data: commande });
-  } catch (error) {
-    console.error('Error getting Commande:', error);
-    res.status(500).json({ message: 'Error getting Commande' });
   }
 };
 
@@ -157,12 +192,15 @@ exports.updateCommande = async (req, res) => {
     commande.state = state;
     await commande.save();
 
-    // If the state is "Confirmed", decrease the volume of each produit by 1
+    // If the state is "Confirmed", decrease the quantity of each produit in CommandeProduit
     if (state === 'Confirmed') {
       for (const produit of commande.Produits) {
-        if (produit.volume > 0) {
-          produit.volume -= 1;
-          await produit.save();
+        const commandeProduit = await CommandeProduit.findOne({
+          where: { produitId: produit.id, commandeId }
+        });
+        if (commandeProduit.quantity > 0) {
+          commandeProduit.quantity -= 1;
+          await commandeProduit.save();
         }
       }
     }
@@ -174,16 +212,22 @@ exports.updateCommande = async (req, res) => {
   }
 };
 
-
-
 // Function to delete a Commande
 exports.deleteCommande = async (req, res) => {
   try {
     const commandeId = req.params.id;
-    const rowsAffected = await Commande.destroy({ where: { id: commandeId } });
-    if (rowsAffected === 0) {
+    const commande = await Commande.findByPk(commandeId);
+
+    if (!commande) {
       return res.status(404).json({ message: 'Commande not found' });
     }
+
+    // Delete the associated CommandeProduits
+    await CommandeProduit.destroy({ where: { commandeId } });
+
+    // Delete the Commande
+    await Commande.destroy({ where: { id: commandeId } });
+
     res.status(200).json({ message: 'Commande deleted successfully' });
   } catch (error) {
     console.error('Error deleting Commande:', error);
