@@ -5,9 +5,13 @@ exports.createUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password, address, gouvernorat, city,phone, postalCode } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10); 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ where: { email: email } });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already exists' });
+    }
+    const existingUser2 = await User.findOne({ where: {  phone: phone  } });
+    if (existingUser) {
+      return res.status(400).json({ message: 'phone already exists' });
     }
     const newUser = await User.create({
       firstName,
