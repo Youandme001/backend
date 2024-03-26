@@ -6,8 +6,8 @@ const jwt = require('jsonwebtoken');
 const auth = require('../middlewares/auth');
   
 router.post("/login",UserController.loginUser);
-router.get("/", UserController.getAllUsers);
-router.get("/:id", UserController.getUserById);
+router.get("/",auth.authenticateAdmin, UserController.getAllUsers);
+router.get("/:id", auth.authenticateAdmin,UserController.getUserById);
 router.post('/create', UserController.createUser);
 router.put("/update/:id",auth.authenticateUser,UserController.updateUser);
 router.put("/updatePasssword/:id",auth.authenticateUser,UserController.updatePassword);
