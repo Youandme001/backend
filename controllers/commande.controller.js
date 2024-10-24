@@ -173,15 +173,10 @@ exports.getAllCommandsForUser = async (req, res, next) => {
 exports.updateCommande = async (req, res) => {
   try {
     const commandeId = req.params.id;
-    const { state } = req.body; // Extract the state from the request body
+    const { state } = req.body;
 
     const commande = await Commande.findByPk(commandeId, {
-      include: [{
-        model: Produit,
-        through: {
-          attributes: ['produitId'],
-        },
-      }],
+      include: Produit, // Include Produit model directly
     });
 
     if (!commande) {
@@ -189,8 +184,7 @@ exports.updateCommande = async (req, res) => {
     }
 
     // Update the state of the commande
-    commande.state = state;
-    await commande.save();
+    await commande.update({ state });
 
     // If the state is "Confirmed", decrease the quantity of each produit in CommandeProduit
     if (state === 'Confirmed') {
@@ -198,13 +192,20 @@ exports.updateCommande = async (req, res) => {
         const commandeProduit = await CommandeProduit.findOne({
           where: { produitId: produit.id, commandeId }
         });
-        if (commandeProduit.quantity > 0) {
-          commandeProduit.quantity -= 1;
-          await commandeProduit.save();
+        if (commandeProduit && commandeProduit.quantity > 0) { // Check if commandeProduit exists
+          // Find the product associated with the CommandeProduit
+          const produitToUpdate = await Produit.findByPk(produit.id);
+    
+          // Decrement the volume of the product by commandeProduit.quantity
+          if (produitToUpdate.volume >= commandeProduit.quantity) {
+            await produitToUpdate.decrement('volume', { by: commandeProduit.quantity });
+          } else {
+            console.error(`Insufficient volume for product ${produitToUpdate.name}`);
+          }
         }
       }
     }
-
+    
     res.status(200).json({ message: 'Commande state updated successfully' });
   } catch (error) {
     console.error('Error updating Commande state:', error);
