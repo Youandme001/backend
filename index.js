@@ -40,3 +40,7 @@ app.use(errors.errorHandler);
 app.listen(process.env.PORT || 4000, function () {
   console.log("Ready to Go!");
 });
+// In your Express.js project, you can simply log the Node.js version to the console
+console.log("Node.js version:", process.version);
+
+module.exports = app; 

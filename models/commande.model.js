@@ -21,7 +21,7 @@ const Commande = sequelize.define('Commande', {
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
   },
   commandeDate: {
     type: DataTypes.DATE,

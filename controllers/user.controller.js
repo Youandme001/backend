@@ -34,6 +34,48 @@ exports.createUser = async (req, res) => {
   }
 };
 
+exports.createUser1 = async (req, res) => {
+  try {
+    const { firstName, lastName, address, gouvernorat, city, phone, postalCode } = req.body;
+
+    const existingUserByPhone = await User.findOne({ where: { phone } });
+
+    let user = existingUserByPhone;
+
+    if (!existingUserByPhone) {
+      user = await User.create({
+        firstName,
+        lastName,
+        phone,
+        address,
+        gouvernorat,
+        city,
+        postalCode
+      });
+    }
+
+    // ✅ Correct JWT signing
+    const payload = { user: { id: user.id } };
+
+    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2h' }, (err, token) => {
+      if (err) {
+        console.error('JWT Signing Error:', err);
+        return res.status(500).json({ message: 'Error generating authentication token' });
+      }
+
+      res.status(200).json({
+        message: 'User created successfully',
+        user,
+        token
+      });
+    });
+
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ message: 'Error creating user' });
+  }
+};
+
 exports.updateUser = async (req, res) => {
     try {
       const userId = req.params.id;
