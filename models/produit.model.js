@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const { DataTypes } = require('sequelize');
 const Category = require('./category.model'); // 🔄 Import category
+const ProduitImage = require('./produitImage.model'); // ✅ Import ProduitImage
 
 const sequelize = new Sequelize(
   process.env.DB_DATABASE,
@@ -19,7 +20,7 @@ const Produit = sequelize.define('Produit', {
     autoIncrement: true,
     allowNull: false,
   },
-  name: {
+  name: { // 🛠️ Missing field "name"
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -42,7 +43,7 @@ const Produit = sequelize.define('Produit', {
   categoryId: {
     type: DataTypes.INTEGER,
     references: {
-      model: Category, // Establish foreign key
+      model: Category, // Relation with Category
       key: 'id',
     },
   },
@@ -58,9 +59,12 @@ const Produit = sequelize.define('Produit', {
   },
 });
 
-// Establish association
-Produit.belongsTo(Category, { foreignKey: 'categoryId', onDelete: 'SET NULL' });
+// ✅ Establish associations:
+Produit.belongsTo(Category, { foreignKey: 'categoryId', as: 'Category', onDelete: 'SET NULL' });
 Category.hasMany(Produit, { foreignKey: 'categoryId' });
+
+Produit.hasMany(ProduitImage, { foreignKey: 'product_id', as: 'images' });
+ProduitImage.belongsTo(Produit, { foreignKey: 'product_id' });
 
 sequelize.sync();
 module.exports = Produit;

@@ -52,25 +52,25 @@ exports.getAllProduits = async (req, res, next) => {
 exports.getProduitById = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const produit = await Produit.findByPk(id,{
-      include: [ProduitImage, Category],});
+
+    const produit = await Produit.findByPk(id, {
+      include: [
+        { model: ProduitImage, as: 'images' }, // ✅ use alias "images"
+        { model: Category, as: 'Category' }     // ✅ use alias "Category"
+      ],
+    });
+
     if (!produit) {
       res.status(404).json({ message: 'Produit not found' });
       return;
     }
-    const images = await ProduitImage.findAll({
-      where: { product_id: produit.id }
-    });
-    const productWithImages = {
-      ...produit.toJSON(),
-      images: images 
-    };
 
-    res.status(200).json({ message: "Success", data: productWithImages });
+    res.status(200).json({ message: "Success", data: produit });
   } catch (err) {
     next(err);
   }
 };
+
 
 exports.updateProduit = async (req, res, next) => {
   try {

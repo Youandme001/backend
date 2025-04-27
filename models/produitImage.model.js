@@ -1,5 +1,4 @@
-const Sequelize = require('sequelize');
-const Produit = require('../models/produit.model.js');
+const { Sequelize, DataTypes } = require('sequelize');
 
 const sequelize = new Sequelize(
   process.env.DB_DATABASE,
@@ -12,43 +11,35 @@ const sequelize = new Sequelize(
 
 const ProduitImage = sequelize.define('ProduitImage', {
   id: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.INTEGER,
     primaryKey: true, 
     autoIncrement: true, 
     allowNull: false, 
   },
   product_id: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: Produit, // Reference to the Produit model
-      key: 'id',  // Column in the Produit table to reference
-    },
   },
   filename: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   filepath: {
-    type: Sequelize.STRING,
-    allowNull: true, // Allow filepath to be null if not used
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   createdAt: {
-    type: Sequelize.DATE,
+    type: DataTypes.DATE,
     allowNull: false,
     defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
   },
   updatedAt: {
-    type: Sequelize.DATE,
+    type: DataTypes.DATE,
     allowNull: false,
     defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
   },
 });
 
-// Define the association
-ProduitImage.belongsTo(Produit, { foreignKey: 'product_id', onDelete: 'CASCADE' }); 
-
-// Sync the models with the database
-sequelize.sync(); 
+// ❌ NO Produit.belongsTo here directly
 
 module.exports = ProduitImage;
