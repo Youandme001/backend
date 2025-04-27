@@ -34,6 +34,7 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use(logger());
 app.use("/produit", require("./routes/produit.routes"));
+app.use("/categories", require("./routes/category.routes.js"));
 app.use("/user", require("./routes/user.routes"));
 app.use("/commande", require("./routes/commande.routes"));
 app.use("/admin", require("./routes/admin.routes"));
