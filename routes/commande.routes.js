@@ -7,6 +7,7 @@ const auth = require('../middlewares/auth');
 
 
 router.get("/",auth.authenticateAdmin, CommandeController.getAllCommande);
+router.get("/stats",auth.authenticateAdmin, CommandeController.getDashboardStats);
 router.get("/:id",auth.authenticateAdmin, CommandeController.getCommandeById);
 router.get("/userById/:id",auth.authenticateUser, CommandeController.getAllCommandsForUser);
 router.post('/create',auth.authenticateUser, CommandeController.createCommande);

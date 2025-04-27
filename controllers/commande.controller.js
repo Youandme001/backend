@@ -2,16 +2,16 @@ const Commande = require('../models/commande.model');
 const Produit = require('../models/produit.model.js');
 const User = require('../models/user.model.js');
 const CommandeProduit = require('../models/CommandeProduit.model.js');
-const Sequelize = require('sequelize');
-
+const { Sequelize, Op } = require('sequelize');
 exports.createCommande = async (req, res) => {
   try {
     const { userId, products, totalPrice } = req.body;
 
     // Create new Commande
+    console.log(totalPrice);
     const newCommande = await Commande.create({
       userId,
-      totalPrice,
+      totalPrice: parseFloat(totalPrice), // Ensure totalPrice is a number
       state: 'pending', // Assuming 'state' is set to 'pending' by default
     });
 
@@ -70,6 +70,56 @@ exports.getAllCommande = async (req, res, next) => {
     res.status(200).json({ message: "Success", data: commandesWithProducts });
   } catch (err) {
     next(err);
+  }
+};
+
+// Add this to your commande.controller.js
+ // adjust path if needed
+
+exports.getDashboardStats = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const stats = await Commande.findAll({
+      attributes: [
+        [Sequelize.literal(`COUNT(CASE WHEN state = 'Confirmed' THEN 1 END)`), 'confirmedCount'],
+        [Sequelize.literal(`SUM(CASE WHEN state = 'Confirmed' THEN totalPrice ELSE 0 END)`), 'confirmedTotal'],
+        [Sequelize.literal(`COUNT(CASE WHEN state = 'pending' THEN 1 END)`), 'pendingCount'],
+        [Sequelize.literal(`COUNT(CASE WHEN createdAt >= '${today.toISOString()}' AND createdAt < '${tomorrow.toISOString()}' THEN 1 END)`), 'todayCount'],
+        [Sequelize.literal(`COUNT(CASE WHEN createdAt >= '${yesterday.toISOString()}' AND createdAt < '${today.toISOString()}' THEN 1 END)`), 'yesterdayCount'],
+      ],
+      raw: true,
+    });
+
+    const result = stats[0] || {
+      confirmedCount: 0,
+      confirmedTotal: 0,
+      pendingCount: 0,
+      todayCount: 0,
+      yesterdayCount: 0
+    };
+
+    const percentChange = result.yesterdayCount > 0
+      ? (((result.todayCount - result.yesterdayCount) / result.yesterdayCount) * 100).toFixed(2)
+      : result.todayCount > 0 ? '100.00' : '0.00';
+
+    res.status(200).json({
+      confirmedTotal: parseFloat(result.confirmedTotal) || 0,
+      confirmedCount: parseInt(result.confirmedCount),
+      pendingCount: parseInt(result.pendingCount),
+      todayCount: parseInt(result.todayCount),
+      percentChange
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ message: 'Error fetching dashboard stats' });
   }
 };
 

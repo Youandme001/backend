@@ -3,16 +3,19 @@ const app = express();
 const mysql = require("mysql2");
 const router = express.Router();
 const cors = require('cors');
-const bodyParser = require('body-parser'); 
-const logger = require("morgan"); 
-require('dotenv').config(); // Load environment variables from .env file
-app.use(bodyParser.urlencoded({ extended: true })); 
+const bodyParser = require('body-parser');
+const logger = require("morgan");
 const errors = require("./middlewares/errors.js");
 const multer = require('multer');
 const path = require('path');
-app.use(cors());
-
-router.use(cors());
+require('dotenv').config();
+app.use(cors({
+        origin: ['https://admin.glowy.boutique','https://www.admin.glowy.boutique','https://www.admin.glowy.tn','https://www.glowy.boutique','https://glowy.boutique'],
+        methods:['GET','POST','PUT','DELETE','OPTIONS'],
+        credentials: true,
+}));
+app.use(bodyParser.urlencoded({ extended: true,limit:'100mb'}));
+app.use(express.json({limit:'100mb'}));
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -40,7 +43,3 @@ app.use(errors.errorHandler);
 app.listen(process.env.PORT || 4000, function () {
   console.log("Ready to Go!");
 });
-// In your Express.js project, you can simply log the Node.js version to the console
-console.log("Node.js version:", process.version);
-
-module.exports = app; 

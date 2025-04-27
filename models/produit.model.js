@@ -1,20 +1,23 @@
 const Sequelize = require('sequelize');
 const { DataTypes } = require('sequelize');
+const Category = require('./category.model'); // 🔄 Import category
 
 const sequelize = new Sequelize(
-  process.env.DB_DATABASE, 
+  process.env.DB_DATABASE,
   process.env.DB_USER,
-  process.env.DB_PASSWORD, {
-  host: process.env.DB_HOST,
-  dialect: 'mysql',
-});
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: 'mysql',
+  }
+);
 
 const Produit = sequelize.define('Produit', {
   id: {
     type: Sequelize.INTEGER,
-    primaryKey: true, // Mark the field as a primary key
-    autoIncrement: true, // Enable auto-incrementing for the primary key
-    allowNull: false, // Prevent null values
+    primaryKey: true,
+    autoIncrement: true,
+    allowNull: false,
   },
   name: {
     type: DataTypes.STRING,
@@ -30,11 +33,18 @@ const Produit = sequelize.define('Produit', {
   volume: {
     type: DataTypes.INTEGER,
   },
-  designation: { // Added new column for designation
+  designation: {
     type: DataTypes.STRING,
   },
-  propertiesCosmetics: { // Added new column for propertiesCosmetics
+  propertiesCosmetics: {
     type: DataTypes.STRING,
+  },
+  categoryId: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Category, // Establish foreign key
+      key: 'id',
+    },
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -47,6 +57,10 @@ const Produit = sequelize.define('Produit', {
     defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
   },
 });
+
+// Establish association
+Produit.belongsTo(Category, { foreignKey: 'categoryId', onDelete: 'SET NULL' });
+Category.hasMany(Produit, { foreignKey: 'categoryId' });
 
 sequelize.sync();
 module.exports = Produit;

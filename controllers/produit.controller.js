@@ -1,13 +1,17 @@
 const ProduitService = require('../services/produit.services.js');
 const Produit = require('../models/produit.model.js');
 const ProduitImage = require('../models/produitImage.model.js');
-const ip = "http://localhost:4000/uploads/produit/";
+const Category = require('../models/category.model'); // ✅ ajoute cette ligne
+
+const ip = "https://api.glowy.boutique/uploads/produit/";
 
 exports.createProduit = async (req, res, next) => {
   try {
-    const { name, description, price, volume, designation, propertiesCosmetics } = req.body;
-    const newProduit = await Produit.create({ name, description, price, volume, designation, propertiesCosmetics });
-    const produitId = newProduit.id;
+    const { name, description, price, volume, designation, propertiesCosmetics ,categoryId } = req.body;
+    const newProduit = await Produit.create({
+      name, description, price, volume, designation, propertiesCosmetics, categoryId
+    });
+        const produitId = newProduit.id;
     if (req.files && req.files.length > 0) {
       const imagePromises = req.files.map(async (image) => {
         return await ProduitImage.create({
@@ -27,7 +31,9 @@ exports.createProduit = async (req, res, next) => {
 
 exports.getAllProduits = async (req, res, next) => {
   try {
-    const produits = await Produit.findAll();
+    const produits = await Produit.findAll({
+      include: [Category],
+    });
     const productsWithImages = await Promise.all(produits.map(async (produit) => {
       const images = await ProduitImage.findAll({
         where: { product_id: produit.id }
@@ -46,7 +52,8 @@ exports.getAllProduits = async (req, res, next) => {
 exports.getProduitById = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const produit = await Produit.findByPk(id);
+    const produit = await Produit.findByPk(id,{
+      include: [ProduitImage, Category],});
     if (!produit) {
       res.status(404).json({ message: 'Produit not found' });
       return;
@@ -67,12 +74,12 @@ exports.getProduitById = async (req, res, next) => {
 
 exports.updateProduit = async (req, res, next) => {
   try {
-    const { id, name, description, price, volume, designation, propertiesCosmetics } = req.body;
+    const { id, name, description, price, volume, designation, propertiesCosmetics,categoryId } = req.body;
     const existingProduit = await Produit.findByPk(id);
     if (!existingProduit) {
       throw new Error('Produit not found');
     }
-    await existingProduit.update({ name, description, price, volume, designation, propertiesCosmetics });
+    await existingProduit.update({ name, description, price, volume, designation, propertiesCosmetics,categoryId });
     if (req.files && req.files.length > 0) {
       await ProduitImage.destroy({ where: { product_id: id } });
       const imagePromises = req.files.map(async (image) => {

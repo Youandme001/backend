@@ -29,7 +29,7 @@ const Commande = sequelize.define('Commande', {
     defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
   },
   totalPrice: {
-    type: DataTypes.DECIMAL, 
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
   state: {

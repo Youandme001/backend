@@ -6,14 +6,14 @@ const adminController = require('../controllers/admin.controller');
 const auth = require('../middlewares/auth');
 
 // Register admin
-router.post(
-  '/register',
-  [
-    check('email', 'Please include a valid email').isEmail(),
-    check('password', 'Password must be at least 6 characters long').isLength({ min: 6 }),
-  ],
-  adminController.register
-);
+//router.post(
+  //'/register',
+  //[
+    //check('email', 'Please include a valid email').isEmail(),
+    //check('password', 'Password must be at least 6 characters long').isLength({ min: 6 }),
+ // ],
+ // adminController.register
+//);
 
 // Login admin
 router.post('/login', adminController.login);

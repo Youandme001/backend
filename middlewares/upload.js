@@ -4,12 +4,16 @@ const multer = require('multer');
 const path = require('path');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads/produit')); 
+    cb(null, path.join(__dirname, '../uploads/produit'));
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname); 
+    cb(null, file.originalname);
   }
 });
-const upload = multer({ storage });
+const upload = multer({
+                storage,
+                limits:{fileSize:Infinity}
+ });
 
 module.exports = upload;
+
