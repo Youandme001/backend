@@ -32,22 +32,18 @@ exports.createProduit = async (req, res, next) => {
 exports.getAllProduits = async (req, res, next) => {
   try {
     const produits = await Produit.findAll({
-      include: [Category],
+      include: [
+        { model: ProduitImage, as: 'images' }, // ✅ Include images correctly
+        { model: Category, as: 'Category' }    // ✅ Include category correctly
+      ],
     });
-    const productsWithImages = await Promise.all(produits.map(async (produit) => {
-      const images = await ProduitImage.findAll({
-        where: { product_id: produit.id }
-      });
-      return {
-        ...produit.toJSON(),
-        images: images 
-      };
-    }));
-    res.status(200).json({ message: "Success", data: productsWithImages });
+
+    res.status(200).json({ message: "Success", data: produits });
   } catch (err) {
     next(err);
   }
 };
+
 
 exports.getProduitById = async (req, res, next) => {
   try {
