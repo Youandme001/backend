@@ -10,7 +10,7 @@ const multer = require('multer');
 const path = require('path');
 require('dotenv').config();
 app.use(cors({
-        origin: ['https://admin.glowy.boutique','https://www.admin.glowy.boutique','https://www.admin.glowy.tn','https://www.glowy.boutique','https://glowy.boutique'],
+        origin: ['https://admin.glowy.boutique','https://www.admin.glowy.boutique','https://www.admin.glowy.tn','https://www.glowy.boutique','https://glowy.boutique','http://localhost:3000'],
         methods:['GET','POST','PUT','DELETE','OPTIONS'],
         credentials: true,
 }));
