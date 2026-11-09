@@ -26,7 +26,7 @@ function toDto(commande) {
     user: commande.User || null,
     products: (commande.lignes || []).map((l) => ({
       id: l.produitId,
-      name: l.Produit ? l.Produit.name : 'Produit supprimé',
+      name: l.Produit?.name || l.productName || 'Produit supprimé',
       price: l.unitPrice ?? (l.Produit ? l.Produit.price : null),
       quantity: l.quantity,
       image: l.Produit?.images?.[0]?.filepath || null,
@@ -74,7 +74,7 @@ async function create(userId, items) {
       { transaction: t }
     );
     await CommandeProduit.bulkCreate(
-      produits.map((p) => ({ commandeId: created.id, produitId: p.id, quantity: quantities.get(p.id), unitPrice: p.price })),
+      produits.map((p) => ({ commandeId: created.id, produitId: p.id, quantity: quantities.get(p.id), unitPrice: p.price, productName: p.name })),
       { transaction: t }
     );
     return created;

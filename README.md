@@ -71,4 +71,4 @@ Jeton : en-tête `Authorization: Bearer <token>`. Statuts de commande : `pending
 
 ## Base existante (2024–2025)
 
-Les noms de tables sont inchangés. Pour ajouter les nouvelles colonnes (`Commandes.shippingFee`, `CommandeProduits.unitPrice`) à une base existante, démarrer une fois avec `DB_SYNC_ALTER=true`.
+Les noms de tables sont inchangés. Pour ajouter les nouvelles colonnes (`Commandes.shippingFee`, `CommandeProduits.unitPrice` / `productName`, `produitId` nullable) à une base existante, démarrer une fois avec `DB_SYNC_ALTER=true`.

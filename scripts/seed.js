@@ -90,14 +90,14 @@ async function main() {
       commandeDate: date, createdAt: date, updatedAt: date,
     });
     await CommandeProduit.bulkCreate(
-      lignes.map((l) => ({ commandeId: commande.id, produitId: l.produit.id, quantity: l.quantity, unitPrice: l.produit.price }))
+      lignes.map((l) => ({ commandeId: commande.id, produitId: l.produit.id, quantity: l.quantity, unitPrice: l.produit.price, productName: l.produit.name }))
     );
     n += 1;
   }
   for (let i = 0; i < 2; i += 1) {
     const date = daysAgo(0, 9 + i);
     const commande = await Commande.create({ userId: users[i + 2].id, totalPrice: 25 + shippingFee, shippingFee, state: 'pending', commandeDate: date, createdAt: date, updatedAt: date });
-    await CommandeProduit.create({ commandeId: commande.id, produitId: produits[i].id, quantity: 1, unitPrice: 25 });
+    await CommandeProduit.create({ commandeId: commande.id, produitId: produits[i].id, quantity: 1, unitPrice: 25, productName: produits[i].name });
   }
 
   console.log(`Seed OK: ${produits.length} products, ${users.length} customers, ${n + 2} orders`);

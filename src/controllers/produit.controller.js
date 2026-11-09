@@ -62,7 +62,7 @@ exports.update = async (req, res) => {
 exports.remove = async (req, res) => {
   const produit = await findWithDetails(req.params.id);
   if (!produit) throw new HttpError(404, 'Produit not found');
-  await deleteImageFiles(produit.images);
   await produit.destroy();
+  await deleteImageFiles(produit.images);
   res.json({ message: 'Success' });
 };

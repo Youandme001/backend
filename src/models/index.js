@@ -18,6 +18,6 @@ Commande.belongsTo(User, { foreignKey: 'userId' });
 
 Commande.hasMany(CommandeProduit, { foreignKey: 'commandeId', as: 'lignes', onDelete: 'CASCADE' });
 CommandeProduit.belongsTo(Commande, { foreignKey: 'commandeId' });
-CommandeProduit.belongsTo(Produit, { foreignKey: 'produitId' });
+CommandeProduit.belongsTo(Produit, { foreignKey: 'produitId', onDelete: 'SET NULL' });
 
 module.exports = { sequelize, Admin, Category, Produit, ProduitImage, User, Commande, CommandeProduit };
