@@ -1,2 +1,9 @@
-node_modules
+node_modules/
+.env
 .vercel
+.vscode/
+uploads/*
+!uploads/produit/
+uploads/produit/*
+!uploads/produit/.gitkeep
+*.log
